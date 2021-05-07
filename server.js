@@ -9,6 +9,9 @@ require('dotenv').config();
 const apiRoutes = require('./routes/api');
 const fccTestingRoutes = require('./routes/fcctesting.js');
 const runner = require('./test-runner');
+const mongoose = require('mongoose');
+const uri = process.env.MONGODB_URI;
+let port = process.env.PORT;
 
 let app = express();
 
@@ -40,21 +43,39 @@ app.use(function (req, res, next) {
   res.status(404).type('text').send('Not Found');
 });
 
-//Start our server and tests!
-app.listen(process.env.PORT || 3000, function () {
-  console.log('Listening on port ' + process.env.PORT);
-  if (process.env.NODE_ENV === 'test') {
-    console.log('Running Tests...');
-    setTimeout(function () {
-      try {
-        runner.run();
-      } catch (e) {
-        let error = e;
-        console.log('Tests are not valid:');
-        console.log(error);
+mongoose
+  .connect(uri, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    serverSelectionTimeoutMS: 5000,
+  })
+  .then(() => {
+    if (port == null || port == '') {
+      port = 8000;
+    }
+
+    app.listen(port, function () {
+      if (process.env.NODE_ENV === 'test') {
+        console.log('Running Tests...');
+        setTimeout(function () {
+          try {
+            runner.run();
+          } catch (e) {
+            let error = e;
+            console.log('Tests are not valid:');
+            console.log(error);
+          }
+        }, 3500);
       }
-    }, 3500);
-  }
+    });
+  })
+
+  .catch(err => console.log(err));
+
+const connection = mongoose.connection;
+connection.on('error', console.error.bind(console, 'connection error:'));
+connection.once('open', () => {
+  console.log('MongoDB database connection established successfully');
 });
 
 module.exports = app; //for testing
