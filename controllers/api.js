@@ -6,33 +6,35 @@ exports.getProject = function (req, res) {
 };
 
 exports.postProject = async function (req, res) {
-  //   let project = req.params.project;
+  let project = req.params.project;
 
   const {
     issue_title, //*
     issue_text, //*
-    created_by, //*
     assigned_to,
     status_text,
+    created_by, //*
   } = req.body;
 
-  console.log(req.body);
+  //   console.log('----');
+  //   console.log(req.body);
+  //   console.log('----');
 
   if (issue_title === '' || typeof issue_title === 'undefined') {
-    console.log('issue_title field is required');
+    console.log({ error: 'required field(s) missing' });
 
-    return res.status(404).json('issue_title field is required');
+    return res.status(404).json({ error: 'required field(s) missing' });
   }
 
   if (issue_text === '' || typeof issue_text === 'undefined') {
-    console.log('issue_text field is required');
+    console.log({ error: 'required field(s) missing' });
 
-    return res.status(404).json('issue_text field is required');
+    return res.status(404).json({ error: 'required field(s) missing' });
   }
   if (created_by === '' || typeof created_by === 'undefined') {
-    console.log('created_by field is required');
+    console.log({ error: 'required field(s) missing' });
 
-    return res.status(404).json('created_by field is required');
+    return res.status(404).json({ error: 'required field(s) missing' });
   }
 
   try {
@@ -46,7 +48,7 @@ exports.postProject = async function (req, res) {
         issue_title: issue_title,
         issue_text: issue_text,
         created_on: new Date(),
-        updated_on: '',
+        updated_on: new Date(),
         created_by: created_by,
         assigned_to: assigned_to,
         open: true,
@@ -54,7 +56,7 @@ exports.postProject = async function (req, res) {
       });
       await findOne.save();
       console.log(findOne);
-      return res.status(200).json('ok');
+      return res.status(200).json(findOne);
     }
   } catch (error) {
     console.log(error);

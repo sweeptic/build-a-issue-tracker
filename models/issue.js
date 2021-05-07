@@ -4,11 +4,11 @@ const Schema = mongoose.Schema;
 issueSchema = new Schema({
   issue_title: { type: String, required: true },
   issue_text: { type: String, required: true },
+  created_by: { type: String, required: true },
   created_on: { type: Date },
   updated_on: { type: Date },
-  created_by: { type: String, required: true },
   assigned_to: { type: String },
-  open: { type: Boolean, required: true },
+  open: { type: Boolean },
   status_text: { type: String },
   /*
   issue_title: 'Fix error in posting data',
