@@ -15,8 +15,6 @@ issueSchema = new Schema(
   { versionKey: false }
 );
 
-// module.exports = mongoose.model('MyProject', issueSchema);
-
-module.exports = function(collectionName) {
-  return mongoose.model("Item", issueSchema, collectionName);
+module.exports = function (collectionName) {
+  return mongoose.model('Item', issueSchema, collectionName);
 };
