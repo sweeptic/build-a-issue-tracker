@@ -1,34 +1,57 @@
 const ISSUE = require('../models/issue');
 
-exports.getProject = function (req, res) {
+
+
+exports.getProject = async function (req, res) {
+  
   let project = req.params.project;
-  res.json({ greeting: 'hello from getProject' });
+  const myIssue = ISSUE(project)
+
+  let findAll = await myIssue.find();
+
+  res.json(findAll.map(issue => issue));
+
 };
 
+
+
+
+
+
 exports.postProject = async function (req, res) {
+
+  
   let project = req.params.project;
+  const myIssue = ISSUE(project)
+  
 
-  const {
-    issue_title, //*
-    issue_text, //*
-    created_by, //*
-    assigned_to = '',
-    status_text = '',
-  } = req.body;
+  const { issue_title, issue_text, created_by, assigned_to = '', status_text = '',} = req.body;
 
-  if (issue_title === '' || issue_text === '' || created_by === '') {
+ 
+
+  if (
+    typeof issue_title === 'undefined' ||
+    typeof issue_text === 'undefined' ||
+    typeof created_by === 'undefined'
+  ) {
     console.log({ error: 'required field(s) missing' });
-    return res.status(404).json({ error: 'required field(s) missing' });
+    return res.status(200).json({ error: 'required field(s) missing' });
   }
 
+
+
   try {
-    let findOne = await ISSUE.findOne({ issue_title: issue_title });
+    let findOne = await myIssue.findOne({ issue_title: issue_title });
 
     if (findOne) {
       console.log('Issue is already in database');
       return res.status(200).json('Issue is already in database');
     } else {
-      findOne = new ISSUE({
+
+      
+
+
+      findOne = new myIssue({
         issue_title: issue_title,
         issue_text: issue_text,
         created_on: new Date(),
@@ -38,8 +61,10 @@ exports.postProject = async function (req, res) {
         open: true,
         status_text: status_text,
       });
+
       await findOne.save();
-      console.log(findOne);
+
+
       return res.status(200).json(findOne);
     }
   } catch (error) {

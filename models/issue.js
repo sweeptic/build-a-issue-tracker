@@ -11,18 +11,12 @@ issueSchema = new Schema(
     assigned_to: { type: String },
     open: { type: Boolean },
     status_text: { type: String },
-    /*
-  issue_title: 'Fix error in posting data',
-  issue_text: 'When we post data it has an error.',
-  created_on: '2017-01-08T06:35:14.240Z',
-  updated_on: '2017-01-08T06:35:14.240Z',
-  created_by: 'Joe',
-  assigned_to: 'Joe',
-  open: true,
-  status_text: 'In QA',
-  */
   },
   { versionKey: false }
 );
 
-module.exports = mongoose.model('Issue', issueSchema);
+// module.exports = mongoose.model('MyProject', issueSchema);
+
+module.exports = function(collectionName) {
+  return mongoose.model("Item", issueSchema, collectionName);
+};
