@@ -11,29 +11,13 @@ exports.postProject = async function (req, res) {
   const {
     issue_title, //*
     issue_text, //*
-    assigned_to,
-    status_text,
     created_by, //*
+    assigned_to = '',
+    status_text = '',
   } = req.body;
 
-  //   console.log('----');
-  //   console.log(req.body);
-  //   console.log('----');
-
-  if (issue_title === '' || typeof issue_title === 'undefined') {
+  if (issue_title === '' || issue_text === '' || created_by === '') {
     console.log({ error: 'required field(s) missing' });
-
-    return res.status(404).json({ error: 'required field(s) missing' });
-  }
-
-  if (issue_text === '' || typeof issue_text === 'undefined') {
-    console.log({ error: 'required field(s) missing' });
-
-    return res.status(404).json({ error: 'required field(s) missing' });
-  }
-  if (created_by === '' || typeof created_by === 'undefined') {
-    console.log({ error: 'required field(s) missing' });
-
     return res.status(404).json({ error: 'required field(s) missing' });
   }
 
