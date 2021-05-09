@@ -6,6 +6,40 @@ const server = require('../server');
 chai.use(chaiHttp);
 
 suite('Functional Tests', function () {
+  const getUserInput = 'http://localhost:3000/';
+
+  test('renders ', async getUserInput => {
+    try {
+      let initialData = {
+        issue_title: 'Issue to be Updated',
+        issue_text: 'Functional Test - Put target',
+        created_by: 'fCC',
+      };
+      const url = getUserInput('url') + '/api/issues/fcc-project';
+
+      const itemToUpdate = await $.post(url, initialData);
+      const updateSucccess = await $.ajax({
+        url: url,
+        type: 'PUT',
+        data: { _id: itemToUpdate._id, issue_text: 'New Issue Text' },
+      });
+      assert.isObject(updateSucccess);
+      assert.deepEqual(updateSucccess, {
+        result: 'successfully updated',
+        _id: itemToUpdate._id,
+      });
+      const getUpdatedId = await $.get(url + '?_id=' + itemToUpdate._id);
+      assert.isArray(getUpdatedId);
+      assert.isObject(getUpdatedId[0]);
+      assert.isAbove(
+        Date.parse(getUpdatedId[0].updated_on),
+        Date.parse(getUpdatedId[0].created_on)
+      );
+    } catch (err) {
+      throw new Error(err.responseText || err.message);
+    }
+  });
+
   test('Create an issue with every field: POST request to /api/issues/{project} ', () => {});
   test('Create an issue with only required fields: POST request to /api/issues/{project}', () => {});
   test('Create an issue with missing required fields: POST request to /api/issues/{project}', () => {});

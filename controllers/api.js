@@ -40,10 +40,10 @@ exports.postProject = async function (req, res) {
     findOne = new issueCollection({
       issue_title: req.body.issue_title,
       issue_text: req.body.issue_text,
+      assigned_to: req.body.assigned_to || '',
       created_on: new Date(),
       updated_on: new Date(),
       created_by: req.body.created_by,
-      assigned_to: req.body.assigned_to || '',
       open: true,
       status_text: req.body.status_text || '',
     });
@@ -55,9 +55,54 @@ exports.postProject = async function (req, res) {
   }
 };
 
-exports.putProject = function (req, res) {
-  let project = req.params.project;
-  res.json({ greeting: 'hello from putProject' });
+exports.putProject = async function (req, res) {
+  const issueCollection = ISSUE(req.params.project);
+  const _id = req.body._id;
+
+  if (typeof _id === 'undefined') {
+    return res.json({ error: 'missing _id' });
+  }
+
+  try {
+    let newRecord = await issueCollection.findById(_id);
+    // console.log('newRecord:', newRecord);
+
+    // newRecord._id = new ObjectId(_id);
+    // const originalRecord = newRecord
+
+    let newId = { _id: new ObjectId(_id) };
+
+    let updatedRecord = {
+      ...newRecord._doc,
+      ...req.query,
+      updated_on: new Date(),
+    };
+    // let updatedRecord = { open: false };
+    delete updatedRecord[_id];
+
+    // console.log(updatedRecord);
+    // console.log(req.query);
+
+    newRecord.overwrite(updatedRecord);
+
+    await newRecord.save();
+
+    return res.status(200).json({ result: 'successfully updated', _id: _id });
+    // console.log(newRecord);
+  } catch (error) {
+    console.log(error);
+
+    return res.status(500).json('Server error');
+  }
+
+  // try {
+  //   newRecord = await issueCollection.findById(_id);
+
+  //   return res.status(500).json('finded');
+  // } catch (err) {
+  //    return res.status(500).json('Server error');
+
+  // }
 };
 
 exports.deleteProject = function (req, res) {
