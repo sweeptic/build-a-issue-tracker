@@ -89,7 +89,23 @@ exports.putProject = async function (req, res) {
   }
 };
 
-exports.deleteProject = function (req, res) {
-  let project = req.params.project;
-  res.json({ greeting: 'hello from deleteProject' });
+exports.deleteProject = async function (req, res) {
+  const _id = req.body._id;
+  const issueCollection = ISSUE(req.params.project);
+  const newRecord = await issueCollection.findById(_id);
+
+  if (typeof _id === 'undefined') {
+    return res.json({ error: 'missing _id' });
+  }
+
+  if (newRecord === null) {
+    return res.json({ error: 'could not delete', _id: _id });
+  }
+
+  try {
+    await issueCollection.deleteOne({ _id: _id });
+    return res.status(200).json({ result: 'successfully deleted', _id: _id });
+  } catch (error) {
+    return res.json({ error: 'server error', _id: _id });
+  }
 };
