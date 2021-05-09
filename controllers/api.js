@@ -17,9 +17,9 @@ exports.getProject = async function (req, res) {
       } else query.open = false;
     }
 
-    const findAll = await issueCollection.find(query);
+    const allIssues = await issueCollection.find(query);
 
-    res.status(200).json([...findAll]);
+    res.status(200).json([...allIssues]);
   } catch (error) {
     return res.status(500).json('Server error');
   }
@@ -56,53 +56,37 @@ exports.postProject = async function (req, res) {
 };
 
 exports.putProject = async function (req, res) {
-  const issueCollection = ISSUE(req.params.project);
   const _id = req.body._id;
+  const issueCollection = ISSUE(req.params.project);
+  const newRecord = await issueCollection.findById(_id);
 
   if (typeof _id === 'undefined') {
     return res.json({ error: 'missing _id' });
   }
 
+  if (Object.keys(req.body).join() === '_id') {
+    return res.json({ error: 'no update field(s) sent', _id: _id });
+  }
+
+  if (newRecord === null) {
+    return res.json({ error: 'could not update', _id: _id });
+  }
+
   try {
-    let newRecord = await issueCollection.findById(_id);
-    // console.log('newRecord:', newRecord);
-
-    // newRecord._id = new ObjectId(_id);
-    // const originalRecord = newRecord
-
-    let newId = { _id: new ObjectId(_id) };
-
     let updatedRecord = {
       ...newRecord._doc,
-      ...req.query,
+      ...req.body,
       updated_on: new Date(),
     };
-    // let updatedRecord = { open: false };
+
     delete updatedRecord[_id];
-
-    // console.log(updatedRecord);
-    // console.log(req.query);
-
     newRecord.overwrite(updatedRecord);
-
     await newRecord.save();
 
     return res.status(200).json({ result: 'successfully updated', _id: _id });
-    // console.log(newRecord);
   } catch (error) {
-    console.log(error);
-
-    return res.status(500).json('Server error');
+    return res.json({ error: 'server error', _id: _id });
   }
-
-  // try {
-  //   newRecord = await issueCollection.findById(_id);
-
-  //   return res.status(500).json('finded');
-  // } catch (err) {
-  //    return res.status(500).json('Server error');
-
-  // }
 };
 
 exports.deleteProject = function (req, res) {
